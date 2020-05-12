@@ -16,7 +16,6 @@ public class Curso {
 
     @ManyToOne
     @JoinColumn(name = "codigo_categoria", nullable = false)
-    //@JsonManagedReference
     private CategoriaCurso categoria;
 
     @Column(name = "descricao")
