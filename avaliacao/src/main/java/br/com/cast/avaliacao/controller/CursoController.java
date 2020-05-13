@@ -71,8 +71,8 @@ public class CursoController {
             curso.setDataTermino(patch.getDataTermino());
         }
 
-        if(validator.validateCourse(curso)) {
-            if(validator.validatePeriod(curso)) {
+        if(validator.validateCourse(patch)) {
+            if(validator.validatePeriod(patch)) {
                 repoCurso.save(curso);
             }
             else {
