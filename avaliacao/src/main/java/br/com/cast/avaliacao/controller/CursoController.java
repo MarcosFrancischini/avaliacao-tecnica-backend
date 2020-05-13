@@ -3,6 +3,7 @@ package br.com.cast.avaliacao.controller;
 import br.com.cast.avaliacao.model.Curso;
 import br.com.cast.avaliacao.repository.CategoriaCursoRepositorio;
 import br.com.cast.avaliacao.repository.CursoRepositorio;
+import br.com.cast.avaliacao.utils.CourseValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -33,13 +34,26 @@ public class CursoController {
     @PostMapping(consumes = "application/json")
     @ResponseStatus(code = HttpStatus.CREATED)
     public Curso post(@RequestBody Curso curso) {
-        return repoCurso.save(curso);
+        CourseValidator validator = new CourseValidator(repoCurso);
+
+        if(validator.validateCourse(curso)) {
+            if(validator.validatePeriod(curso)) {
+                return repoCurso.save(curso);
+            }
+            else {
+                throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED);
+            }
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
+        }
     }
 
     @PatchMapping(path = "/{id}", consumes = "application/json")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void put(@PathVariable("id") Long id, @RequestBody Curso patch) {
         Curso curso = repoCurso.findById(id).get();
+        CourseValidator validator = new CourseValidator(repoCurso);
 
         if(patch.getDescricao() != null) {
             curso.setDescricao(patch.getDescricao());
@@ -57,7 +71,17 @@ public class CursoController {
             curso.setDataTermino(patch.getDataTermino());
         }
 
-        repoCurso.save(curso);
+        if(validator.validateCourse(curso)) {
+            if(validator.validatePeriod(curso)) {
+                repoCurso.save(curso);
+            }
+            else {
+                throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED);
+            }
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
+        }
     }
 
     @DeleteMapping(path = "/{id}")
